@@ -1,9 +1,9 @@
 # Update Operation
 Command:
->>> book = Book.objects.get(title="The fall")
->>> book.title = "The fall of olympus"
+>>> book = Book.objects.get(title="1984")
+>>> book.title = "Nineteen Eighty-Four"
 >>> book.save()
->>> print(Book.objects.get(author="Ekwere").title)
+>>> print(Book.objects.get(author="George Orwell").title)
 
 Output:
-The fall of olympus
+Nineteen Eighty-Four

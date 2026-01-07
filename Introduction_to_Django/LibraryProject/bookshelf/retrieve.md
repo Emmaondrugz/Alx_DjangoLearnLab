@@ -1,7 +1,7 @@
 # Retrieve Operation
 Command:
->>> retrieved_book = Book.objects.get(title="The fall")
+>>> retrieved_book = Book.objects.get(title="1984")
 >>> print(retrieved_book.author)
 
 Output:
-Ekwere
+George Orwell
