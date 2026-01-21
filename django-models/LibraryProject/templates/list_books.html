@@ -1,11 +1,16 @@
-{% extends 'base.html' %}
-{% block title %} My Books {% endblock %}
-
-{% block content %}
-    <h1>Available Books:</h1>
+<!-- list_books.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List of Books</title>
+</head>
+<body>
+    <h1>Books Available:</h1>
     <ul>
         {% for book in books %}
-        {{ book.title }} by {{ book.author.name }}
+        <li>{{ book.title }} by {{ book.author.name }}</li>
         {% endfor %}
     </ul>
-{% endblock %}
+</body>
+</html>
