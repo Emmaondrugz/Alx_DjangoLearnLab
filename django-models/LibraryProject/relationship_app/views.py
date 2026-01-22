@@ -3,8 +3,8 @@ from .models import Library
 from .models import Book
 from django.urls import reverse_lazy
 from django.views.generic.detail import DetailView
-from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
@@ -64,7 +64,25 @@ def member_view(request):
 
 
 
+# View for Adding a Book
+@permission_required('relationship_app.can_add_book', raise_exception=True)
+def add_book(request):
+    # Logic for adding a book would go here
+    return render(request, 'relationship_app/add_book.html')
 
+# View for Editing a Book
+@permission_required('relationship_app.can_change_book', raise_exception=True)
+def edit_book(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    # Logic for editing the book would go here
+    return render(request, 'relationship_app/edit_book.html', {'book': book})
+
+# View for Deleting a Book
+@permission_required('relationship_app.can_delete_book', raise_exception=True)
+def delete_book(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    # Logic for deleting the book would go here
+    return render(request, 'relationship_app/delete_book.html', {'book': book})
 
 
 
