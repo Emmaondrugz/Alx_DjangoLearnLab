@@ -16,7 +16,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Point to custom User model
-AUTH_USER_MODEL = 'relationship_app.User'
+AUTH_USER_MODEL = 'bookshelf.User'
 
 
 # Quick-start development settings - unsuitable for production
