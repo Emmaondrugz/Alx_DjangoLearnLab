@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Book
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User
+from .models import CustomUser
 
 
 # Register your models here.
@@ -18,7 +18,7 @@ class CustomUserAdmin(UserAdmin):
     """
     custom admin interface for the user model.
     """
-    model = User
+    model = CustomUser
 
     # fileds to diplay in the user list view
     list_display = ['username', 'email', 'date_of_birth', 'profile_photo']
