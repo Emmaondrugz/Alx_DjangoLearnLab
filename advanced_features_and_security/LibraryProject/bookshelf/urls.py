@@ -1,7 +1,9 @@
 from django.urls import path
-from .views import BookTemplateView
+from . import views
 
 urlpatterns = [
-    # We use .as_view() because it is a class based view
-    path('my_books/', BookTemplateView.as_view(), name='book_list')
+    path('users/', views.list_users, name='list_users'),
+    path('users/create/', views.create_user, name='create_user'),
+    path('users/edit/<int:user_id>/', views.edit_user, name='edit_user'),
+    path('users/delete/<int:user_id>/', views.delete_user, name='delete_user'),
 ]
