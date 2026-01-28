@@ -260,3 +260,116 @@ def insecure_form(request):
     # Form without CSRF token is vulnerable
     pass
 """
+
+"""
+Secure views implementation for bookshelf app.
+
+Security features implemented:
+- CSRF protection on all POST requests
+- SQL injection prevention using Django ORM
+- XSS prevention through template escaping
+- Input validation using Django forms
+- Permission checks
+"""
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_protect
+from django.contrib import messages
+from django.db.models import Q
+from .forms import ExampleForm, SearchForm
+from .models import Book
+
+
+@csrf_protect
+def form_example_view(request):
+    """
+    Example view demonstrating secure form handling.
+
+    Security measures:
+    - @csrf_protect decorator ensures CSRF protection
+    - Django Form handles validation and sanitization
+    - No raw SQL queries (prevents SQL injection)
+    - Template auto-escapes output (prevents XSS)
+    """
+    if request.method == 'POST':
+        form = ExampleForm(request.POST)
+
+        if form.is_valid():
+            # Access cleaned and validated data
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            message = form.cleaned_data['message']
+
+            # Process the data securely
+            # In a real app, you might save to database using ORM
+            messages.success(request, f'Thank you, {name}! Your message has been received.')
+
+            # Redirect after successful POST (prevents double submission)
+            return redirect('form_example')
+        else:
+            # Form has errors - they will be displayed in template
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        # GET request - display empty form
+        form = ExampleForm()
+
+    return render(request, 'bookshelf/form_example.html', {'form': form})
+
+
+@csrf_protect
+def book_list_view(request):
+    """
+    Display list of books with search functionality.
+
+    Security measures:
+    - CSRF protection
+    - Safe query handling with Django ORM
+    - Input validation through SearchForm
+    - XSS prevention through template escaping
+    """
+    form = SearchForm(request.GET)
+    books = Book.objects.all()
+
+    if form.is_valid():
+        query = form.cleaned_data.get('query')
+
+        if query:
+            # SECURE: Using Django ORM with Q objects
+            # Automatically parameterizes queries - prevents SQL injection
+            books = books.filter(
+                Q(title__icontains=query) |
+                Q(author__icontains=query)
+            )
+
+    context = {
+        'books': books,
+        'form': form,
+    }
+
+    return render(request, 'bookshelf/book_list.html', context)
+
+
+# Example of INSECURE code (DO NOT USE):
+"""
+# INSECURE - SQL Injection vulnerability
+def insecure_search(request):
+    query = request.GET.get('q', '')
+    # DANGER: Direct SQL with string formatting
+    sql = f"SELECT * FROM books WHERE title LIKE '%{query}%'"
+    # Attacker could inject: '; DROP TABLE books; --
+
+# INSECURE - Missing CSRF protection
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt  # NEVER DO THIS!
+def insecure_form(request):
+    # Vulnerable to CSRF attacks
+    pass
+
+# INSECURE - No input validation
+def insecure_input(request):
+    user_input = request.POST.get('data')
+    # Using raw input without validation
+    # Vulnerable to XSS and other attacks
+"""

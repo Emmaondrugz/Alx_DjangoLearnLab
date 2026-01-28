@@ -2,77 +2,136 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+
+    <title>Secure Form Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .errorlist {
+            color: red;
+            list-style: none;
+            padding: 0;
+        }
+        .messages {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
 </head>
 <body>
+    <h1>Secure Form Example</h1>
 
-{% block content %}
-<h2>{{ form_title }}</h2>
-
-{% comment %}
-SECURITY: CSRF Token Protection
-- {% csrf_token %} is REQUIRED in all POST forms
-- Without it, form submissions will be rejected
-- Protects against Cross-Site Request Forgery attacks
-{% endcomment %}
-
-<form method="post" action="{{ form_action }}">
-    {% csrf_token %}  {# CRITICAL: CSRF protection #}
-
-    {% comment %}
-    Django automatically escapes all variables to prevent XSS
-    Using |escape filter explicitly for demonstration
-    {% endcomment %}
-
-    <div>
-        <label for="username">Username:</label>
-        <input
-            type="text"
-            id="username"
-            name="username"
-            value="{{ user.username|escape }}"
-            required
-            maxlength="150"
-        >
-    </div>
-
-    <div>
-        <label for="email">Email:</label>
-        <input
-            type="email"
-            id="email"
-            name="email"
-            value="{{ user.email|escape }}"
-            required
-            maxlength="254"
-        >
-    </div>
-
-    {% if show_password %}
-    <div>
-        <label for="password">Password:</label>
-        <input
-            type="password"
-            id="password"
-            name="password"
-            required
-            minlength="8"
-        >
-    </div>
+    <!-- Display messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="messages {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
     {% endif %}
 
-    <button type="submit">{{ submit_text }}</button>
-</form>
+    <!--
+    SECURITY: CSRF Token Protection
+    The {% csrf_token %} tag is REQUIRED in all POST forms
+    It generates a hidden input field with a unique token
+    Django validates this token on form submission to prevent CSRF attacks
+    -->
+    <form method="post">
+        {% csrf_token %}
 
-{% comment %}
-SECURITY NOTES:
-1. Always use {% csrf_token %} in POST forms
-2. Django auto-escapes variables (prevents XSS)
-3. Use maxlength to limit input size (prevents abuse)
-4. Use appropriate input types (email, password, etc.)
-5. Use required attribute for mandatory fields
-{% endcomment %}
+        <!-- Render form fields with Django's built-in security -->
+        <div class="form-group">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            {% if form.name.errors %}
+                <ul class="errorlist">
+                    {% for error in form.name.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <small>{{ form.name.help_text }}</small>
+        </div>
 
-{% endblock %}
+        <div class="form-group">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {% if form.email.errors %}
+                <ul class="errorlist">
+                    {% for error in form.email.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <small>{{ form.email.help_text }}</small>
+        </div>
+
+        <div class="form-group">
+            {{ form.message.label_tag }}
+            {{ form.message }}
+            {% if form.message.errors %}
+                <ul class="errorlist">
+                    {% for error in form.message.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <small>{{ form.message.help_text }}</small>
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <!--
+    SECURITY NOTES:
+    1. {% csrf_token %} prevents CSRF attacks
+    2. Django auto-escapes all variables to prevent XSS
+    3. Form validation happens server-side (never trust client)
+    4. Use POST for data modification (GET for retrieval only)
+    -->
 </body>
 </html>
