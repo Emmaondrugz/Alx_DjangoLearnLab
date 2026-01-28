@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+{% block content %}
+<h2>{{ form_title }}</h2>
+
+{% comment %}
+SECURITY: CSRF Token Protection
+- {% csrf_token %} is REQUIRED in all POST forms
+- Without it, form submissions will be rejected
+- Protects against Cross-Site Request Forgery attacks
+{% endcomment %}
+
+<form method="post" action="{{ form_action }}">
+    {% csrf_token %}  {# CRITICAL: CSRF protection #}
+
+    {% comment %}
+    Django automatically escapes all variables to prevent XSS
+    Using |escape filter explicitly for demonstration
+    {% endcomment %}
+
+    <div>
+        <label for="username">Username:</label>
+        <input
+            type="text"
+            id="username"
+            name="username"
+            value="{{ user.username|escape }}"
+            required
+            maxlength="150"
+        >
+    </div>
+
+    <div>
+        <label for="email">Email:</label>
+        <input
+            type="email"
+            id="email"
+            name="email"
+            value="{{ user.email|escape }}"
+            required
+            maxlength="254"
+        >
+    </div>
+
+    {% if show_password %}
+    <div>
+        <label for="password">Password:</label>
+        <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            minlength="8"
+        >
+    </div>
+    {% endif %}
+
+    <button type="submit">{{ submit_text }}</button>
+</form>
+
+{% comment %}
+SECURITY NOTES:
+1. Always use {% csrf_token %} in POST forms
+2. Django auto-escapes variables (prevents XSS)
+3. Use maxlength to limit input size (prevents abuse)
+4. Use appropriate input types (email, password, etc.)
+5. Use required attribute for mandatory fields
+{% endcomment %}
+
+{% endblock %}
+</body>
+</html>

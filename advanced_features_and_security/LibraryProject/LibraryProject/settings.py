@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,12 +24,12 @@ AUTH_USER_MODEL = 'bookshelf.CustomUser'
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-wo0#jx_)(kz#l1$$rf(eyl@jq_094!+2@@&2$pu*#0h^xxy-cs'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-wo0#jx_)(kz#l1$$rf(eyl@jq_094!+2@@&2$pu*#0h^xxy-cs')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.yourdomain.com']
 
 
 # Application definition
@@ -40,8 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'csp',
     'bookshelf',
-    'relationship_app'
+    'relationship_app',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'LibraryProject.urls'
@@ -63,6 +66,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -120,3 +124,132 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Media files (User uploaded content)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# =====================================================
+# SECURITY SETTINGS - BEST PRACTICES
+# =====================================================
+
+# Step 1: Browser Security Headers
+
+# SECURE_BROWSER_XSS_FILTER: Enables the browser's XSS filtering
+# and tells it to block the page if XSS attack is detected
+SECURE_BROWSER_XSS_FILTER = True
+
+# X_FRAME_OPTIONS: Prevents clickjacking attacks by preventing
+# the site from being loaded in an iframe
+X_FRAME_OPTIONS = 'DENY'  # Options: 'DENY' or 'SAMEORIGIN'
+
+# SECURE_CONTENT_TYPE_NOSNIFF: Prevents browsers from MIME-sniffing
+# a response away from the declared content-type
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+
+# Step 2: HTTPS/SSL Security Settings
+
+# CSRF_COOKIE_SECURE: Ensures CSRF cookie is only sent over HTTPS
+# Protects CSRF tokens from being transmitted over insecure connections
+CSRF_COOKIE_SECURE = True  # Set to True in production with HTTPS
+
+# SESSION_COOKIE_SECURE: Ensures session cookie is only sent over HTTPS
+# Prevents session hijacking over insecure connections
+SESSION_COOKIE_SECURE = True  # Set to True in production with HTTPS
+
+# SECURE_SSL_REDIRECT: Redirects all HTTP requests to HTTPS
+SECURE_SSL_REDIRECT = True  # Set to True in production
+
+# SECURE_HSTS_SECONDS: HTTP Strict Transport Security
+# Forces browsers to only communicate with site over HTTPS for specified time
+SECURE_HSTS_SECONDS = 31536000  # 1 year in seconds
+
+# SECURE_HSTS_INCLUDE_SUBDOMAINS: Applies HSTS to all subdomains
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# SECURE_HSTS_PRELOAD: Allows submission to browser preload list
+SECURE_HSTS_PRELOAD = True
+
+
+# Step 3: Cookie Security Settings
+
+# SESSION_COOKIE_HTTPONLY: Prevents JavaScript from accessing session cookie
+# Protects against XSS attacks stealing session tokens
+SESSION_COOKIE_HTTPONLY = True
+
+# CSRF_COOKIE_HTTPONLY: Prevents JavaScript from accessing CSRF cookie
+CSRF_COOKIE_HTTPONLY = True
+
+# SESSION_COOKIE_SAMESITE: Prevents CSRF by limiting cookie to same-site requests
+SESSION_COOKIE_SAMESITE = 'Strict'  # Options: 'Strict', 'Lax', 'None'
+
+# CSRF_COOKIE_SAMESITE: Prevents CSRF by limiting CSRF cookie to same-site requests
+CSRF_COOKIE_SAMESITE = 'Strict'
+
+
+# Step 4: Content Security Policy (CSP)
+# Defines which sources are allowed to load content (scripts, styles, images, etc.)
+# This prevents XSS attacks by restricting where content can be loaded from
+
+CSP_DEFAULT_SRC = ("'self'",)  # Default: only load from same origin
+CSP_SCRIPT_SRC = ("'self'",)  # Only allow scripts from same origin
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")  # Allow inline styles (use cautiously)
+CSP_IMG_SRC = ("'self'", "data:", "https:")  # Allow images from self and HTTPS
+CSP_FONT_SRC = ("'self'",)  # Only allow fonts from same origin
+CSP_CONNECT_SRC = ("'self'",)  # Only allow AJAX/WebSocket to same origin
+CSP_FRAME_ANCESTORS = ("'none'",)  # Prevent framing (similar to X-Frame-Options)
+CSP_BASE_URI = ("'self'",)  # Restrict base tag URLs
+CSP_FORM_ACTION = ("'self'",)  # Restrict form submission URLs
+
+
+# Step 5: Additional Security Settings
+
+# SECURE_PROXY_SSL_HEADER: For sites behind a proxy/load balancer
+# Uncomment if using a reverse proxy like nginx or Apache
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# CSRF_TRUSTED_ORIGINS: List of trusted origins for unsafe requests (POST, PUT, DELETE)
+# Required when using CSRF_COOKIE_SECURE with different domains
+# CSRF_TRUSTED_ORIGINS = ['https://yourdomain.com', 'https://www.yourdomain.com']
+
+
+# Development Override (Remove in production)
+# These settings should be relaxed only in development
+if DEBUG:
+    # Allow local development without HTTPS
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+    SECURE_SSL_REDIRECT = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+
+    # Allow localhost
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+
+# Logging Configuration for Security Monitoring
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'security.log',
+        },
+    },
+    'loggers': {
+        'django.security': {
+            'handlers': ['file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
