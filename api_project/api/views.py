@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import Book
 from rest_framework.generics import ListAPIView
-from .serializer import BookSerializer
+from .serializers import BookSerializer
 
 
 # Create your views here.
