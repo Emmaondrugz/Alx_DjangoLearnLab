@@ -1,13 +1,52 @@
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import AllowAny,IsAuthenticatedOrReadOnly, IsAuthenticated
+from .models import Book
+from .serializers import BookSerializer
+from rest_framework import filters
+
+# Step 1: List all books (Public Read-Only)
+from rest_framework import generics, filters
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import Book
 from .serializers import BookSerializer
 
-# Step 1: List all books (Public Read-Only)
+
 class BookListView(generics.ListAPIView):
-    queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
+
+    # 1. Define Filter Backends as Class Attributes
+    # This enables built-in Search and Ordering alongside your custom filtering
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
+    # Configuration for built-in SearchFilter
+    search_fields = ['title', 'author', 'publication_year']
+
+    # Configuration for built-in OrderingFilter
+    ordering_fields = ['title','author', 'publication_year']
+
+    def get_queryset(self):
+        """
+        Custom filtering logic to stack filters based on query parameters.
+        """
+        # Start with all objects
+        queryset = Book.objects.all()
+
+        # Get parameters from the URL
+        title = self.request.query_params.get('title')
+        author = self.request.query_params.get('author')
+        publication_year = self.request.query_params.get('publication_year')
+
+        # 2. Stack the filters (Use 'queryset = queryset.filter' to keep previous filters)
+        if title:
+            queryset = queryset.filter(title__icontains=title)
+        if author:
+            queryset = queryset.filter(author__icontains=author)
+        if publication_year:
+            # Note: icontains on an IntegerField works in some DBs but 'exact' is safer for years
+            queryset = queryset.filter(publication_year=publication_year)
+
+        return queryset
 
 # Step 1: Retrieve single book (Public Read-Only)
 class BookDetailView(generics.RetrieveAPIView):
