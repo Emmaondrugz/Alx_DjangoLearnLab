@@ -3,27 +3,26 @@ from .models import Book
 from .models import Author
 from django.utils import timezone
 
-
-# Book serializer class
+# Book serializer for the Book model
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
         fields = ['title', 'publication_year', 'author']
 
-    # Validate book publication year to not accept future dates
-    def validate_publication_year(self, value):
-        current_year = timezone.now().year
+    # Custom validation to prevent future date
+    def validate_publication_year(self, data):
+        present = timezone.now().year
 
-        if value > current_year:
-            raise serializers.ValidationError('Publication year cannot be in the future')
+        if data > present:
+            raise serializers.ValidationError("can't use future dates.")
 
-        return value
+        return data
 
-# Author serializer class
+# Author serializer for the Author model
 class AuthorSerializer(serializers.ModelSerializer):
-
-    # Nested books serializer to display books of each author
     books = BookSerializer(many=True, read_only=True)
+
     class Meta:
         model = Author
         fields = ['name', 'books']
+
