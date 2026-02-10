@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny,IsAuthenticatedOrReadOnly, IsAuthenticated
 from .models import Book
 from .serializers import BookSerializer
-from rest_framework import filters
+from django_filters import rest_framework
 
 # Step 1: List all books (Public Read-Only)
 from rest_framework import generics, filters
@@ -17,7 +17,7 @@ class BookListView(generics.ListAPIView):
 
     # 1. Define Filter Backends as Class Attributes
     # This enables built-in Search and Ordering alongside your custom filtering
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    filter_backends = [rest_framework, filters.SearchFilter, filters.OrderingFilter]
 
     # Configuration for built-in SearchFilter
     search_fields = ['title', 'author', 'publication_year']
