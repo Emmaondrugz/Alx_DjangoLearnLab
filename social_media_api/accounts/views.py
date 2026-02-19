@@ -17,13 +17,13 @@ class RegistraionView(APIView):
         serializer = UserSerializer(data=data)
 
         if serializer.is_valid():
-            user = serializer.save()
+            serializer.save()
             return Response(
                 {'message': 'User created successfully!'},
-                    status=201
+                    status=status.HTTP_201_CREATED
                             )
         else:
-            return Response(serializer.errors, status=400)
+            return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class LoginView(APIView):
