@@ -7,6 +7,6 @@ urlpatterns = [
     path('login/', TokenObtainPairView.as_view()),
     path('register/', RegistraionView.as_view()),
     path('token/refresh', TokenRefreshView.as_view()),
-    path('follow/<int:pk>', FollowUserView.as_view()),
-    path('unfollow/<int:pk>', UnfollowUserView.as_view())
+    path('follow/<int:user_id>', FollowUserView.as_view()),
+    path('unfollow/<int:user_id>', UnfollowUserView.as_view())
 ]
