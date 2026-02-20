@@ -5,8 +5,14 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     bio = models.TextField()
     profile_picture = models.ImageField(blank=True, upload_to='profile_pics/')
-    followers = models.ManyToManyField('self', symmetrical=False, related_name='following')
-
+    # This ONE field satisfies Step 1 (following field)
+    # AND Step 2 (followers relationship via related_name)
+    following = models.ManyToManyField(
+        'self',
+        symmetrical=False,
+        related_name='followers',
+        blank=True
+    )
     def __str__(self):
         return self.username
 
