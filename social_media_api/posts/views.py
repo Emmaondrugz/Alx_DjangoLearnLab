@@ -43,10 +43,10 @@ class FeedAPIView(generics.GenericAPIView):
 
     def get(self, request):
         # Get the list of user the current user is following
-        followed_users = request.user.following.all()
+        following_users = request.user.following.all()
 
         # Filter post where the author is in the list
-        posts = Post.objects.filter(author__in=followed_users).order_by('-created_at')
+        posts = Post.objects.filter(author__in=following_users).order_by('-created_at')
 
         # serialize the data
         serializer = PostSerializer(posts, many=True)
