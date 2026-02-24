@@ -88,9 +88,9 @@ class UnlikePostView(generics.GenericAPIView):
 
     def post(self, request, pk):
         current_user = request.user
-        target_post = get_object_or_404(Post, pk=pk)
+        target_post = generics.get_object_or_404(Post, pk=pk)
 
-        like_obj, created = Like.objects.get_or_create(user=current_user, post=target_post)
+        like_obj, created = Like.objects.get_or_create(user=request.user, post=target_post)
 
         if not created:
             like_obj.delete()
