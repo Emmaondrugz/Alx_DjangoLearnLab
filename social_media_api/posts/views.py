@@ -63,22 +63,22 @@ class LikePostView(generics.GenericAPIView):
 
     def Post(self, request, pk):
         # Get the specific post
-        target_post = get_object_or_404(Post, pk)
+        post = generics.get_object_or_404(Post, pk)
         current_user = request.user
 
         # check if the user already liked this post (Avoid duplications)
-        like_obj, created = Like.objects.get_or_create(user=current_user, post=target_post)
+        like_obj, created = Like.objects.get_or_create(user=request.user, post=post)
 
         if not created:
             return Response({'error: you already liked this post'}, status.HTTP_400_BAD_REQUEST)
 
         # Only notify if the liker is not the author
-        if target_post.author != current_user:
+        if post.author != current_user:
             Notification.objects.create(
-                recipient=target_post.author,
+                recipient=post.author,
                 actor=current_user,
                 verb="liked",
-                target=target_post,  # This maps to the GenericForeignKey
+                target=post,  # This maps to the GenericForeignKey
             )
 
         return Response('Post has been liked', status.HTTP_201_CREATED)
@@ -88,20 +88,20 @@ class UnlikePostView(generics.GenericAPIView):
 
     def post(self, request, pk):
         current_user = request.user
-        target_post = generics.get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
 
-        like_obj, created = Like.objects.get_or_create(user=request.user, post=target_post)
+        like_obj, created = Like.objects.get_or_create(user=request.user, post=post)
 
         if not created:
             like_obj.delete()
             return Response('Post has been unliked', status.HTTP_200_OK)
         else:
-            if target_post.author != current_user:
+            if post.author != current_user:
                 Notification.objects.create(
-                    recipient=target_post.author,
+                    recipient=post.author,
                     actor=current_user,
                     verb="liked",
-                    target=target_post,
+                    target=post,
                 )
             return Response('Post has been liked', status.HTTP_201_CREATED)
 
