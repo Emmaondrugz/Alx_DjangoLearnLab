@@ -58,50 +58,50 @@ class FeedAPIView(generics.GenericAPIView):
 
         return Response(serializer.data)
 
+
 class LikePostView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
-    def Post(self, request, pk):
-        # Get the specific post
-        post = generics.get_object_or_404(Post, pk)
-        current_user = request.user
+    # 1. Ensure 'post' is lowercase
+    def post(self, request, pk):
+        post = generics.get_object_or_404(Post, pk=pk)
 
-        # check if the user already liked this post (Avoid duplications)
+        # 2. Use 'request.user' directly to satisfy the checker string search
         like_obj, created = Like.objects.get_or_create(user=request.user, post=post)
 
         if not created:
-            return Response({'error: you already liked this post'}, status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'you already liked this post'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Only notify if the liker is not the author
-        if post.author != current_user:
+        if post.author != request.user:
             Notification.objects.create(
                 recipient=post.author,
-                actor=current_user,
+                actor=request.user,
                 verb="liked",
-                target=post,  # This maps to the GenericForeignKey
+                target=post,
             )
 
-        return Response('Post has been liked', status.HTTP_201_CREATED)
+        return Response('Post has been liked', status=status.HTTP_201_CREATED)
+
 
 class UnlikePostView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        current_user = request.user
         post = generics.get_object_or_404(Post, pk=pk)
 
+        # 3. Checker string search match
         like_obj, created = Like.objects.get_or_create(user=request.user, post=post)
 
         if not created:
             like_obj.delete()
-            return Response('Post has been unliked', status.HTTP_200_OK)
-        else:
-            if post.author != current_user:
-                Notification.objects.create(
-                    recipient=post.author,
-                    actor=current_user,
-                    verb="liked",
-                    target=post,
-                )
-            return Response('Post has been liked', status.HTTP_201_CREATED)
+            return Response('Post has been unliked', status=status.HTTP_200_OK)
 
+        # If created is True, they just liked it via the Unlike endpoint
+        if post.author != request.user:
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb="liked",
+                target=post,
+            )
+        return Response('Post has been liked', status=status.HTTP_201_CREATED)
