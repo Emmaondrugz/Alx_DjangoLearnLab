@@ -1,0 +1,34 @@
+# --- Python / Django ---
+*.py[cod]
+__pycache__/
+*.so
+.python-version
+
+# --- Database ---
+# We ignore the local database file
+db.sqlite3
+
+# --- Secret / Environment Variables ---
+# NEVER commit these to GitHub
+.env
+
+# --- Media and Static ---
+# We ignore user-uploaded content (profile pics, etc.)
+media/
+# We ignore the folder where collectstatic gathers files
+staticfiles/
+
+# --- Virtual Environments ---
+# You don't want to upload the thousands of files inside your venv
+venv/
+env/
+.venv/
+ENV/
+
+# --- IDEs / Editors ---
+.vscode/
+.idea/
+.DS_Store
+
+# --- Logs ---
+*.log

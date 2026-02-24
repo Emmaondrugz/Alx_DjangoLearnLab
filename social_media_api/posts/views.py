@@ -13,9 +13,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.filters import OrderingFilter
 from .pagination import StandardResultsPagination
-from rest_framework.generics import get_object_or_404
 
-from ..notifications.models import Notification
+from  notifications.models import Notification
 
 
 # Create your views here.
